@@ -119,6 +119,119 @@ public class MarketDataController extends Thread{
 			System.out.println("SELL 3988 Counter : " + sell3988Counter);
 		}
 	}
+	
+	public static void getAveragePrice(){
+		initialiseData();
+		System.out.println("Output from Server .... \n");
+		boolean brk = false;
+
+		ArrayList<Double> bidPriceList = new ArrayList<Double>();
+		ArrayList<Double> askPriceList = new ArrayList<Double>();
+		
+		int counter = 0; 
+		
+		while(brk == false){
+			String outputJSON = "";
+			
+			try {
+				URL url = new URL("https://cis2017-exchange.herokuapp.com/api/market_data");
+				HttpURLConnection conn = (HttpURLConnection) url.openConnection();
+				conn.setRequestMethod("GET");
+				conn.setRequestProperty("Accept", "application/json");
+
+				if (conn.getResponseCode() != 200) {
+					throw new RuntimeException("Failed : HTTP error code : "
+							+ conn.getResponseCode());
+				}
+
+				BufferedReader br = new BufferedReader(new InputStreamReader(
+						(conn.getInputStream())));
+
+				String output;
+				String symbol = "";
+				
+				double bid = 0.0;
+				double ask = 0.0;
+				
+				while ((output = br.readLine()) != null) {
+					outputJSON += output;
+					ArrayList<String> symbolList = JsonPath.read(outputJSON, "$[*].symbol");
+					ArrayList<Double> bidList = JsonPath.read(outputJSON, "$[*].bid");
+					ArrayList<Double> askList = JsonPath.read(outputJSON, "$[*].ask");
+					symbol = symbolList.get(3);
+					
+					bid = bidList.get(3);
+					//to account for zero occurrence 
+					if(bid != 0) {
+						bidPriceList.add(bid);
+					}
+					
+					ask = askList.get(3);
+					//to account for zero occurrence
+					if(ask != 0) {
+						askPriceList.add(ask);
+					}
+					
+					counter++;
+					
+					//setting the number of readings to average as 30 
+					if(counter >= 30) {
+						brk = true;
+					}
+					
+					System.out.println("symbol: " + symbol + " BID: " + bid  + " ASK: " + ask);
+				}
+
+			} catch (MalformedURLException e) {
+
+				e.printStackTrace();
+
+			} catch (IOException e) {
+
+				e.printStackTrace();
+
+			}
+		}
+		
+		double bidAverage = calculateAverage(bidPriceList);
+		double askAverage = calculateAverage(askPriceList);
+		
+		System.out.println("Bid Average----->" + bidAverage);
+		System.out.println("Ask Average----->" + askAverage);
+		System.out.println("Counter------->" + counter);
+		
+//		if(i3988status.get("3988")== null){
+//			//limit buy
+//			//set as 5% discount off of ask average price 
+//			HashMap<String, Object> i3988Map = Instrument3988Controller.limitBuy(Double.toString(askAverage * 0.95), "10");
+//			i3988status.put("3988", i3988Map.get("3988"));
+//		} else {
+//			//in the condition of 
+//			Instrument3988 i3988 = (Instrument3988) i3988status.get("3988");
+//			// Bid >= 2% of what I bought
+//			double myPrice = Double.parseDouble(i3988.getPrice());
+//			if(bid >= 1.01 * myPrice){
+//				Instrument3988Controller.sell("1", "10"); //market sell
+//				i3988status.put("3988", null);
+//			}
+//			if(sell3988Counter == 6){
+//				sell3988Counter = 0;
+//				Instrument3988Controller.sell("1", "10"); //market sell
+//				i3988status.put("3988", null);
+//			}
+//		}
+		
+	}
+	
+	
+	public static double calculateAverage(ArrayList<Double> list) {
+		double totalAmount = 0.0; 
+		int arrayLength = list.size();
+		for(int i = 0; i < arrayLength; i++ ) {
+			totalAmount += list.get(i);
+		}
+		return totalAmount/arrayLength;
+	}
 
 	/*public static void getMarketData() {
 		Thread thread = new Thread(new Runnable()
