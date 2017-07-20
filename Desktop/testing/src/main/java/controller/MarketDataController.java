@@ -294,7 +294,7 @@ public class MarketDataController extends Thread{
 			 
 			 
 			//start of 3988 transaction
-			if(ask3988Price < (0.97 * previous3988Price) && ask3988Price != 0.0){
+			if(ask3988Price < (0.985 * previous3988Price) && ask3988Price != 0.0){
 				
 				//3988 limit buy
 				try {
@@ -313,7 +313,7 @@ public class MarketDataController extends Thread{
 				
 				//3988 limit sell
 				if(bought = true){
-					double priceToSell = ask3988Price * 1.01;
+					double priceToSell = ask3988Price * 1.03;
 					try {
 						Instrument3988Controller.sellLimit(Double.toString(priceToSell), "500"); //10 is hardcoded
 						totalSpentOnI3988 = 0;
@@ -334,7 +334,7 @@ public class MarketDataController extends Thread{
 			  
 			 
 			//start of 0386 transaction
-			if(ask0386Price < (0.97 * previous0386Price) && ask0386Price != 0.0){
+			if(ask0386Price < (0.985 * previous0386Price) && ask0386Price != 0.0){
 				
 				//0386 limit buy
 				try {
@@ -354,7 +354,7 @@ public class MarketDataController extends Thread{
 				
 				//0386 limit sell
 				if(bought = true){
-					double priceToSell = ask0386Price * 1.01;
+					double priceToSell = ask0386Price * 1.03;
 					try {
 						//test market sell
 						//Instrument0386Controller.sell(Double.toString(priceToSell), "1"); //10 is hardcoded
@@ -378,12 +378,12 @@ public class MarketDataController extends Thread{
 			 */
 			//start of 0005 transaction
 			
-			if(ask0005Price < (0.85 * previous0005Price) && ask0005Price != 0.0){
+			if(ask0005Price < (0.991 * previous0005Price) && ask0005Price != 0.0){
 				
 				//0005 limit buy
 				try {
 					String toBuyPriceInStr = Double.toString(ask0005Price);
-					Instrument0005Controller.buy(toBuyPriceInStr, "1000"); //10 is hardcoded
+					Instrument0005Controller.buy(toBuyPriceInStr, "30"); //10 is hardcoded
 					//Instrument0005Controller.buyLimit(toBuyPriceInStr, "100"); //10 is hardcoded
 					//totalSpentOnI3988 += ask3988Price;
 					totalQtyBoughtI3988 += 100; //still hardcoded 10
@@ -397,9 +397,9 @@ public class MarketDataController extends Thread{
 				
 				//0005 limit sell
 				if(bought = true){
-					double priceToSell = ask0005Price * 1.01;
+					double priceToSell = ask0005Price * 1.02;
 					try {
-						Instrument0005Controller.sellLimit(Double.toString(priceToSell), "1000"); //10 is hardcoded
+						Instrument0005Controller.sellLimit(Double.toString(priceToSell), "30"); //10 is hardcoded
 						//totalSpentOnI3988 = 0;
 						//totalQtyBoughtI3988 = 0;
 					} catch (Exception e) {
@@ -416,12 +416,12 @@ public class MarketDataController extends Thread{
 			
 			
 			//start of 0388 transaction
-			if(ask0388Price < (0.85 * previous0388Price) && ask0388Price != 0.0){
+			if(ask0388Price < (0.991 * previous0388Price) && ask0388Price != 0.0){
 				
 				//0388 limit buy
 				try {
 					String toBuyPriceInStr = Double.toString(ask0388Price);
-					Instrument0388Controller.buy(toBuyPriceInStr, "1000"); //10 is hardcoded
+					Instrument0388Controller.buy(toBuyPriceInStr, "30"); //10 is hardcoded
 					//Instrument0005Controller.buyLimit(toBuyPriceInStr, "100"); //10 is hardcoded
 					previous0388Price = ask0388Price;
 					bought = true;
@@ -431,9 +431,9 @@ public class MarketDataController extends Thread{
 				
 				//0388 limit sell
 				if(bought = true){
-					double priceToSell = ask0388Price * 1.01;
+					double priceToSell = ask0388Price * 1.03;
 					try {
-						Instrument0388Controller.sellLimit(Double.toString(priceToSell), "1000"); //10 is hardcoded
+						Instrument0388Controller.sellLimit(Double.toString(priceToSell), "30"); //10 is hardcoded
 					} catch (Exception e) {
 						System.out.println("Error happening while selling limit order");
 					}
@@ -448,12 +448,12 @@ public class MarketDataController extends Thread{
 			
 			//0001 Trades
 			//start of 0001 transaction
-			if(ask0001Price < (0.85 * previous0001Price) && ask0001Price != 0.0){
+			if(ask0001Price < (0.991 * previous0001Price) && ask0001Price != 0.0){
 				
 				//0001 limit buy
 				try {
 					String toBuyPriceInStr = Double.toString(ask0001Price);
-					Instrument0001Controller.buy(toBuyPriceInStr, "1000"); //10 is hardcoded
+					Instrument0001Controller.buy(toBuyPriceInStr, "30"); //10 is hardcoded
 					//Instrument0001Controller.buyLimit(toBuyPriceInStr, "100"); //10 is hardcoded
 					previous0001Price = ask0001Price;
 					bought = true;
@@ -463,9 +463,9 @@ public class MarketDataController extends Thread{
 				
 				//0001 limit sell
 				if(bought = true){
-					double priceToSell = ask0001Price * 1.01;
+					double priceToSell = ask0001Price * 1.03;
 					try {
-						Instrument0001Controller.sellLimit(Double.toString(priceToSell), "1000"); //10 is hardcoded
+						Instrument0001Controller.sellLimit(Double.toString(priceToSell), "30"); //10 is hardcoded
 					} catch (Exception e) {
 						System.out.println("Error happening while selling limit order");
 					}
