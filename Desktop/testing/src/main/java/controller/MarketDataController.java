@@ -19,6 +19,7 @@ public class MarketDataController extends Thread{
 	
 	
 	static double previous3988Price = 0.0;
+	static double previous0386Price = 0.0;
 	static int tradeCycleCounter = 0;
 	
 	//keeping track of i3988 status
@@ -52,27 +53,36 @@ public class MarketDataController extends Thread{
 						(conn.getInputStream())));
 
 				String output;
-				String symbol = "";
-				double bid = 0.0;
-				double ask = 0.0;
+				
+				String symbol3988 = "";
+				double bid3988 = 0.0;
+				double ask3988 = 0.0;
+				
+				String symbol0386 = "";
+				double bid0386 = 0.0;
+				double ask0386 = 0.0;
+				
 				while ((output = br.readLine()) != null) {
 					outputJSON += output;
 					ArrayList<String> symbolList = JsonPath.read(outputJSON, "$[*].symbol");
 					ArrayList<Double> bidList = JsonPath.read(outputJSON, "$[*].bid");
 					ArrayList<Double> askList = JsonPath.read(outputJSON, "$[*].ask");
-					symbol = symbolList.get(3);
-					bid = bidList.get(3);
-					ask = askList.get(3);
-					System.out.println("symbol: " + symbol + " BID: " + bid  + " ASK: " + ask);
+					
+					//Get 3 because 3988 is at pos 3
+					symbol3988 = symbolList.get(3);
+					bid3988 = bidList.get(3);
+					ask3988 = askList.get(3);
+					//System.out.println("symbol: " + symbol + " BID: " + bid  + " ASK: " + ask);
 					
 					
-					//testing algo1
-					//algo1(ask);
 					
+					symbol0386 = symbolList.get(1);
+					bid0386 = bidList.get(1);
+					ask0386= askList.get(1);
+					System.out.println("symbol: " + symbol0386 + " BID: " + bid0386  + " ASK: " + ask0386);
 					//testing algo2
-					if(ask != 0.0){
-						algo2(ask);
-					}
+					algo2(ask3988, ask0386);
+					
 					
 					
 					
@@ -229,41 +239,49 @@ public class MarketDataController extends Thread{
 		}
 		
 	}
+	
 	// Skips first cycle, compare current price with previous price, if lower, limit buy @ 0.998 *,
 	// Straight away post limit sell @ 1.05 * of price that I bought
 	// Does every 10 seconds
 	//Qty still hardcoded
-	public static void algo2(double askPrice){
+	public static void algo2(double ask3988Price, double ask0386Price){
 		
 		boolean bought = false;
 		
+		
 		// if very first cycle of trade do not buy/sell
+		
 		if(tradeCycleCounter == 1){
-			previous3988Price = askPrice;
+			previous3988Price = ask3988Price;
+			previous0386Price = ask0386Price;
 		} else {
-			
-			//
-			if(askPrice < (0.998 * previous3988Price)){
+			/*
+			 * 
+			 * 3988 Trades
+			 * 
+			 */
+			//start of 3988 transaction
+			if(ask3988Price < (0.97 * previous3988Price) && ask3988Price != 0.0){
 				
-				//limit buy
+				//3988 limit buy
 				try {
-					String toBuyPriceInStr = Double.toString(askPrice);
-					Instrument3988Controller.buyLimit(toBuyPriceInStr, "10"); //10 is hardcoded
-					totalSpentOnI3988 += askPrice;
-					totalQtyBoughtI3988 += 10; //still hardcoded 10
+					String toBuyPriceInStr = Double.toString(ask3988Price);
+					Instrument3988Controller.buyLimit(toBuyPriceInStr, "100"); //10 is hardcoded
+					totalSpentOnI3988 += ask3988Price;
+					totalQtyBoughtI3988 += 100; //still hardcoded 10
 					double testTOTALSPENT = totalSpentOnI3988;
 					double testTOTALBOUGHT = totalQtyBoughtI3988;
-					previous3988Price = askPrice;
+					previous3988Price = ask3988Price;
 					bought = true;
 				} catch (Exception e) {
 					System.out.println("Nobody selling 3988 instrument at this moment");
 				}
 				
-				//limit sell
+				//3988 limit sell
 				if(bought = true){
-					double priceToSell =askPrice * 1.05;
+					double priceToSell = ask3988Price * 1.01;
 					try {
-						Instrument3988Controller.sellLimit(Double.toString(priceToSell), "10"); //10 is hardcoded
+						Instrument3988Controller.sellLimit(Double.toString(priceToSell), "100"); //10 is hardcoded
 						totalSpentOnI3988 = 0;
 						totalQtyBoughtI3988 = 0;
 					} catch (Exception e) {
@@ -271,7 +289,53 @@ public class MarketDataController extends Thread{
 					}
 				}
 			}
-			previous3988Price = askPrice;
+			if(ask3988Price != 0){
+				previous3988Price = ask3988Price;
+			}
+			//end of 3988 transaction
+			
+			/*
+			 * 
+			 * 0386 Trades
+			 * 
+			 */
+			//start of 0386 transaction
+			if(ask0386Price < (0.97 * previous0386Price) && ask0386Price != 0.0){
+				
+				//0386 limit buy
+				try {
+					String toBuyPriceInStr = Double.toString(ask0386Price);
+					//Instrument0386Controller.buyLimit(toBuyPriceInStr, "1"); //10 is hardcoded
+					//test market buy
+					Instrument0386Controller.buy(toBuyPriceInStr, "100"); //10 is hardcoded
+					//totalSpentOnI0386 += ask0386Price;
+					//totalQtyBoughtI3988 += 100; //still hardcoded 10
+					//double testTOTALSPENT = totalSpentOnI3988;
+					//double testTOTALBOUGHT = totalQtyBoughtI3988;
+					previous0386Price = ask0386Price;
+					bought = true;
+				} catch (Exception e) {
+					System.out.println("Nobody selling 0386 instrument at this moment");
+				}
+				
+				//0386 limit sell
+				if(bought = true){
+					double priceToSell = ask0386Price * 1.01;
+					try {
+						//test market sell
+						//Instrument0386Controller.sell(Double.toString(priceToSell), "1"); //10 is hardcoded
+						Instrument0386Controller.sellLimit(Double.toString(priceToSell), "100"); //10 is hardcoded
+						//totalSpentOnI386 = 0;
+						//totalQtyBoughtI396 = 0;
+					} catch (Exception e) {
+						System.out.println("Error happening while selling limit 0386 order");
+					}
+				}
+			}
+			if(ask0386Price != 0){
+				previous0386Price = ask0386Price;
+			}
+			//end of 0386 transaction
 		}
 	}
 }
